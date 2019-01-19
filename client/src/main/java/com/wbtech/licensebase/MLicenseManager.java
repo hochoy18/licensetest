@@ -18,10 +18,11 @@ import java.util.Map;
  * @Description: TODO
  * @date 2019/1/2 下午5:50
  */
-public class MLicenseManager extends LicenseManager{
+public class MLicenseManager extends LicenseManager {
 
     String cModelName;
-    public MLicenseManager(LicenseParam var1){
+
+    public MLicenseManager(LicenseParam var1) {
         super(var1);
     }
 
@@ -43,16 +44,18 @@ public class MLicenseManager extends LicenseManager{
         //验证mac地址
         LicenseCheckModel checkModel = (LicenseCheckModel) licenseContent.getExtra();
         try {
-            if(!HardWareCheck.validateMacAddress(checkModel.getMacAddress())) {
+            if (!HardWareCheck.validateMacAddress(checkModel.getMacAddress())) {
                 throw new LicenseContentException("server mac is not validate");
             }
-            Map<String, ModuleProperties<String,String>> modelAndTimes = checkModel.getModels();
+            Map<String, ModuleProperties<String, String>> modelAndTimes = checkModel.getModels();
             if (modelAndTimes.size() <= 0) {
-                throw new LicenseContentException("model and time are not validate");
+                throw new LicenseContentException("Currently, there is no module to verify, please purchase");
             }
-            //TODO 模块属性验证，目前只验证结束时间，后续如果需要可添加其他验证
-            if (!modelPropertiesValidate(modelAndTimes,cModelName)){
-                throw new LicenseContentException("model and time are not validate");
+            //TODO 模块属性验证，目前只验证结束时间
+            if (!modelAndTimes.containsKey(cModelName) && !modelPropertiesValidate(modelAndTimes, cModelName)) {
+                throw new LicenseContentException("No permission for module " + cModelName +
+                        " or Module " + cModelName + " has expired and its end time is "
+                        + modelAndTimes.get(cModelName).endTime);
             }
 
         } catch (SocketException e) {
@@ -76,7 +79,7 @@ public class MLicenseManager extends LicenseManager{
     protected synchronized LicenseContent install(byte[] var1, LicenseNotary var2) throws Exception {
         GenericCertificate var3 = this.getPrivacyGuard().key2cert(var1);
         var2.verify(var3);
-        LicenseContent var4 = (LicenseContent)var3.getContent();
+        LicenseContent var4 = (LicenseContent) var3.getContent();
 //        this.validate(var4);
         this.setLicenseKey(var1);
         this.setCertificate(var3);
@@ -99,14 +102,15 @@ public class MLicenseManager extends LicenseManager{
             return var4;
         }
     }
-    boolean modelPropertiesValidate(Map<String, ModuleProperties<String,String>> modelAndTimes, String cModelName) {
+
+    boolean modelPropertiesValidate(Map<String, ModuleProperties<String, String>> modelAndTimes, String cModelName) {
         boolean flag = false;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        if (modelAndTimes.containsKey(cModelName)){
+        if (modelAndTimes.containsKey(cModelName)) {
             try {
                 Date client_end_date = format.parse(format.format(new Date()));
                 Date model_end_date = format.parse(modelAndTimes.get(cModelName).endTime);
-                if (model_end_date !=null && client_end_date != null && client_end_date.before(model_end_date)) {
+                if (model_end_date != null && client_end_date != null && client_end_date.before(model_end_date)) {
                     flag = true;
                 }
             } catch (ParseException e) {

@@ -106,7 +106,7 @@ public class LicenseMake {
         return licenseParam;
     }
 
-    public LicenseContent buildLicenseContent(Map<String, ModuleProperties<String, String>> modelAndTimes) throws ParseException {
+    public LicenseContent buildLicenseContent(LicenseCheckModel model) throws ParseException {
         LicenseContent content = new LicenseContent();
         SimpleDateFormat formate = new SimpleDateFormat("yyyy-MM-dd");
         content.setSubject(subject);
@@ -120,18 +120,14 @@ public class LicenseMake {
         content.setNotAfter(formate.parse(notAfter));
         content.setInfo(info);
 
-        LicenseCheckModel model = new LicenseCheckModel();
-        model.setMacAddress(mac);
-
-        model.setModels(modelAndTimes);
         content.setExtra(model);
         return content;
     }
 
-    public void create(Map<String, ModuleProperties<String, String>> modelAndTimes) {
+    public void create(LicenseCheckModel model) {
         try {
             LicenseManager licenseManager = LicenseManagerHolder.getLicenseManager(initLicenseParam());
-            LicenseContent content = buildLicenseContent(modelAndTimes);
+            LicenseContent content = buildLicenseContent(model);
             licenseManager.store(content, new File(licPath));
             System.out.println("证书发布成功");
         } catch (ParseException e) {
@@ -143,16 +139,21 @@ public class LicenseMake {
 
     public static void main(String[] args) throws Exception {
         LicenseMake clicense = new LicenseMake("/licenseMakeConf.properties");
-        Map<String, ModuleProperties<String, String>> modelAndTimes = getModelProperties();
+        LicenseCheckModel modelAndTimes = getCheckModel();
         clicense.create(modelAndTimes);
     }
 
-    public static Map<String, ModuleProperties<String, String>> getModelProperties() {
+    public static LicenseCheckModel getCheckModel() {
+        LicenseCheckModel model = new LicenseCheckModel();
+        String mac = "4C-BB-58-5B-6C-C8";
+        model.setMacAddress(mac);
         Map<String, ModuleProperties<String, String>> modelProperties
                 = new HashMap<String, ModuleProperties<String, String>>();
         modelProperties.put("app", new ModuleProperties<String,String>("2019-01-01", "2019-01-17"));
         modelProperties.put("web", new ModuleProperties<String,String>("2019-01-01", "2019-01-18"));
         modelProperties.put("mini", new ModuleProperties<String,String>("2019-01-01", "2019-01-20"));
-        return modelProperties;
+
+        model.setModels(modelProperties);
+        return model;
     }
 }

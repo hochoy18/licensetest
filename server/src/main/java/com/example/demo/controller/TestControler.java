@@ -1,11 +1,10 @@
 package com.example.demo.controller;
 
 import com.example.demo.license.LicenseMake;
-import com.wbtech.licensebase.ModuleProperties;
+import com.wbtech.licensebase.LicenseCheckModel;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.util.Map;
 
 /**
  * @author wbmac
@@ -25,8 +24,8 @@ public class TestControler {
             @RequestParam(name = "modelName",required = true,defaultValue = "web") String modelName ) {
         modelName = "app";
         LicenseMake clicense = new LicenseMake("/licenseMakeConf.properties");
-        Map<String, ModuleProperties<String, String>> modelProperties = LicenseMake.getModelProperties();
-        clicense.create(modelProperties);
+        LicenseCheckModel checkModel = LicenseMake.getCheckModel();
+        clicense.create(checkModel);
         return "hello";
 
     }
