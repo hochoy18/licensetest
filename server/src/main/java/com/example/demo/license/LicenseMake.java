@@ -150,9 +150,9 @@ public class LicenseMake {
     public static Map<String, ModuleProperties<String, String>> getModelProperties() {
         Map<String, ModuleProperties<String, String>> modelProperties
                 = new HashMap<String, ModuleProperties<String, String>>();
-        modelProperties.put("app", new ModuleProperties<>("2019-01-01", "2019-01-17"));
-        modelProperties.put("web", new ModuleProperties<>("2019-01-01", "2019-01-18"));
-        modelProperties.put("mini", new ModuleProperties<>("2019-01-01", "2019-01-20"));
+        modelProperties.put("app", new ModuleProperties<String,String>("2019-01-01", "2019-01-17"));
+        modelProperties.put("web", new ModuleProperties<String,String>("2019-01-01", "2019-01-18"));
+        modelProperties.put("mini", new ModuleProperties<String,String>("2019-01-01", "2019-01-20"));
         return modelProperties;
     }
 }

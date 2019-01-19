@@ -12,8 +12,11 @@ import java.io.Serializable;
  */
 public class ModuleProperties<T1, T2> implements Serializable {
 
-    public final T1 startTime;
-    public final T2 endTime;
+    public  T1 startTime;
+    public  T2 endTime;
+
+    public ModuleProperties() {
+    }
 
     public ModuleProperties(T1 startTime, T2 endTime) {
         this.startTime = startTime;

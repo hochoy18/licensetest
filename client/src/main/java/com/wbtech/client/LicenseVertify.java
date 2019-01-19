@@ -120,7 +120,7 @@ public class LicenseVertify {
     {
         LicenseVertify vlicense=new LicenseVertify("happy"); // 项目唯一识别码，对应生成配置文件的subject
         vlicense.install(System.getProperty("user.dir")+File.separator + "client/src/main/resources","app");  //D:\eclipse_mars_workspace\LicenseTest
-        vlicense.vertify("app");
+        vlicense.vertify("mini");
     }
 
 }
