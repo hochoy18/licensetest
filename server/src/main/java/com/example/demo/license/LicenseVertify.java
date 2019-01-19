@@ -1,10 +1,12 @@
-package com.wbtech.client;
+package com.example.demo.license;
 
-import com.wbtech.licensebase.MDefaultLicenseParam;
-import com.wbtech.licensebase.MLicenseManager;
+
 import de.schlichtherle.license.*;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
@@ -36,7 +38,8 @@ public class LicenseVertify {
      * 公钥库路径
      */
     private String pubPath;
-    private String confPath=System.getProperty("user.dir") + "/client/src/main/resources/licenseVertifyConf.properties";//"/licenseVertifyConf.properties";
+
+    private String confPath = System.getProperty("user.dir") + "/server/src/main/resources/licenseVertifyConf.properties";
 
     public LicenseVertify(String onlykey){
         setConf(confPath,onlykey);
@@ -52,7 +55,7 @@ public class LicenseVertify {
         try {
             in = new BufferedInputStream(new FileInputStream(confPath));
             prop.load(in);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         this.onlykey = onlykey;
@@ -60,40 +63,31 @@ public class LicenseVertify {
         keyStorePwd = prop.getProperty("key.store.pwd");
         licName = prop.getProperty("license.name");
         pubPath = prop.getProperty("public.store.path");
-//        pubPath = (System.getProperty("user.dir")  + "/client/src/main/resources"+prop.getProperty("public.store.path")).replaceAll("\\\\","/");
-//        pubPath = "E:/work/wbkit/project/Cobub-Java/licensetest/client/src/main/resources/myPublicCerts01.store";
-//        pubPath = (LicenseVertify.class.getResource("/").getPath() + "myPublicCerts01.store").replaceFirst("/","");
-        System.out.println(pubPath);
+//        pubPath = System.getProperty("user.dir")  + "/server/src/main/resources"+prop.getProperty("public.store.path");
     }
 
-    private MDefaultLicenseParam initLicenseParams(String modelName){
+    private LicenseParam initLicenseParams(){
         Class<LicenseVertify> clazz = LicenseVertify.class;
         Preferences pre = Preferences.userNodeForPackage(clazz);
         CipherParam cipherParam = new DefaultCipherParam(keyStorePwd);
         KeyStoreParam pubStoreParam = new DefaultKeyStoreParam(
                 clazz,pubPath,pubAlias,keyStorePwd,null);
 
-        MDefaultLicenseParam licenseParam = new MDefaultLicenseParam(
-                onlykey,pre,pubStoreParam,cipherParam,modelName);
+        LicenseParam licenseParam = new DefaultLicenseParam(
+                onlykey,pre,pubStoreParam,cipherParam);
         return licenseParam;
     }
 
-    private LicenseManager getLicenseManager(String modelName){
-        return  new MLicenseManager(initLicenseParams(modelName),modelName);
-        //return LicenseManagerHolder.getLicenseManager(initLicenseParams());
+    private LicenseManager getLicenseManager(){
+        return LicenseManagerHolder.getLicenseManager(initLicenseParams());
     }
 
-    public void install(String licdir,String modelName) {
+    public void install(String licdir) {
         try {
-            LicenseManager licenseManager = getLicenseManager(modelName);
-            //path=D:\eclipse_mars_workspace\LicenseTest\wlicense.lic
+            LicenseManager licenseManager = getLicenseManager();
+            //path=D:\eclipse_mars_workspace\LicenseTest\1license.lic
             System.out.println("path="+(licdir+File.separator+licName));
-            String path = (licdir+File.separator+licName).replaceAll("\\\\","/");
-            System.out.println("license path ..... "+path);
-            File file = new File(path);
-            if (!file.exists()){
-                System.out.println("xxxxxxxxxxx file "+file+" not exit");
-            }
+            File file = new File(licdir+File.separator+licName);
             licenseManager.install(file);
             System.out.println("安装证书成功！");
         } catch (Exception e) {
@@ -102,16 +96,16 @@ public class LicenseVertify {
 //            System.exit(0);
         }
     }
-    public boolean vertify(String modelName){
+    public boolean vertify(){
         try {
-            LicenseManager licenseManager=getLicenseManager(modelName);
+            LicenseManager licenseManager=getLicenseManager();
             licenseManager.verify();
             System.out.println("验证证书成功！");
             return true;
         }catch (Exception e) {
             System.out.println("验证证书失败！");
 //            System.out.println(e.getLocalizedMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
             return false;
         }
     }
@@ -119,8 +113,8 @@ public class LicenseVertify {
     public static void main(String[] args) throws Exception
     {
         LicenseVertify vlicense=new LicenseVertify("happy"); // 项目唯一识别码，对应生成配置文件的subject
-        vlicense.install(System.getProperty("user.dir")+File.separator + "client/src/main/resources","app");  //D:\eclipse_mars_workspace\LicenseTest
-        vlicense.vertify("app");
+        vlicense.install(System.getProperty("user.dir"));  //D:\eclipse_mars_workspace\LicenseTest
+        vlicense.vertify();
     }
 
 }

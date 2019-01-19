@@ -1,7 +1,6 @@
 package com.wbtech.client;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -16,21 +15,26 @@ import java.net.URLConnection;
  * @date 2019/1/2 下午8:06
  */
 @RestController
+@RequestMapping("/api")
 public class TestControler {
 
-    private String licPath = System.getProperty("user.dir") + File.separator + "lic";
-    @RequestMapping("checkLicense")
-    public String checkLicense() {
+    private String licPath = System.getProperty("user.dir") + File.separator + "license.lic";
+    @RequestMapping(value="checkLicense",method = RequestMethod.GET)
+    @ResponseBody
+    public String checkLicense(
+            @RequestParam(name = "modelName",required = true,defaultValue = "web") String modelName ) {
+        modelName = "app";
+        System.out.println("modelName.............."+modelName);
 
-        try {
-            downloadNet();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            downloadNet();
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        }
 
         LicenseVertify vlicense=new LicenseVertify("happy"); // 项目唯一识别码，对应生成配置文件的subject
-        vlicense.install(licPath);  //D:\eclipse_mars_workspace\LicenseTest
-        boolean success = vlicense.vertify();
+        vlicense.install(licPath,modelName);  //D:\eclipse_mars_workspace\LicenseTest
+        boolean success = vlicense.vertify("app");
         if(success) {
             return "验证成功";
         } else {
@@ -43,7 +47,7 @@ public class TestControler {
         int bytesum = 0;
         int byteread = 0;
 
-        URL url = new URL("http://localhost:9090/license.lic");
+            URL url = new URL("http://localhost:8080/license.lic");
 
         try {
             URLConnection conn = url.openConnection();

@@ -1,6 +1,7 @@
 package com.example.demo.license;
 
 import com.wbtech.licensebase.LicenseCheckModel;
+import com.wbtech.licensebase.ModuleProperties;
 import de.schlichtherle.license.*;
 
 import javax.security.auth.x500.X500Principal;
@@ -9,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
@@ -46,8 +49,10 @@ public class LicenseMake {
     /**
      * X500Principal是一个证书文件的固有格式
      */
+    static String DName = "CN=RIC, OU=Client, O=CBC, L=SH, ST=SH, C=zh";
+    //    static String DName = "CN=wq,OU=iss,O=iss,L=bj,ST=bj,C=china";
     private final static X500Principal DEFAULTHOLDERANDISSUER =
-            new X500Principal("CN=wq,OU=iss,O=iss,L=bj,ST=bj,C=china");
+            new X500Principal(DName);
 
     public LicenseMake(){}
     public LicenseMake(String confPath){
@@ -94,14 +99,14 @@ public class LicenseMake {
          * privateKeyPwd 密钥库密码
          */
         KeyStoreParam privateStoreParam = new DefaultKeyStoreParam(
-                clazz,priPath,priAlias,keyStorePwd,privateKeyPwd);
+                clazz, priPath, priAlias, keyStorePwd, privateKeyPwd);
         //返回生成证书时需要的参数
         LicenseParam licenseParam = new DefaultLicenseParam(
-                subject,pre,privateStoreParam,cipherParam);
+                subject, pre, privateStoreParam, cipherParam);
         return licenseParam;
     }
 
-    public LicenseContent buildLicenseContent() throws ParseException {
+    public LicenseContent buildLicenseContent(Map<String, ModuleProperties<String, String>> modelAndTimes) throws ParseException {
         LicenseContent content = new LicenseContent();
         SimpleDateFormat formate = new SimpleDateFormat("yyyy-MM-dd");
         content.setSubject(subject);
@@ -110,6 +115,7 @@ public class LicenseMake {
         content.setHolder(DEFAULTHOLDERANDISSUER);
         content.setIssuer(DEFAULTHOLDERANDISSUER);
         content.setIssued(formate.parse(issued));
+        //todo 对各个模块时间验证之后，是否需要对整个时间验证
         content.setNotBefore(formate.parse(notBefore));
         content.setNotAfter(formate.parse(notAfter));
         content.setInfo(info);
@@ -117,14 +123,15 @@ public class LicenseMake {
         LicenseCheckModel model = new LicenseCheckModel();
         model.setMacAddress(mac);
 
+        model.setModels(modelAndTimes);
         content.setExtra(model);
         return content;
     }
 
-    public void create(){
+    public void create(Map<String, ModuleProperties<String, String>> modelAndTimes) {
         try {
             LicenseManager licenseManager = LicenseManagerHolder.getLicenseManager(initLicenseParam());
-            LicenseContent content = buildLicenseContent();
+            LicenseContent content = buildLicenseContent(modelAndTimes);
             licenseManager.store(content, new File(licPath));
             System.out.println("证书发布成功");
         } catch (ParseException e) {
@@ -134,9 +141,18 @@ public class LicenseMake {
         }
     }
 
-    public static void main(String[] args) throws Exception
-    {
-        LicenseMake clicense=new LicenseMake("/licenseMakeConf.properties");
-        clicense.create();
+    public static void main(String[] args) throws Exception {
+        LicenseMake clicense = new LicenseMake("/licenseMakeConf.properties");
+        Map<String, ModuleProperties<String, String>> modelAndTimes = getModelProperties();
+        clicense.create(modelAndTimes);
+    }
+
+    public static Map<String, ModuleProperties<String, String>> getModelProperties() {
+        Map<String, ModuleProperties<String, String>> modelProperties
+                = new HashMap<String, ModuleProperties<String, String>>();
+        modelProperties.put("app", new ModuleProperties<>("2019-01-01", "2019-01-17"));
+        modelProperties.put("web", new ModuleProperties<>("2019-01-01", "2019-01-18"));
+        modelProperties.put("mini", new ModuleProperties<>("2019-01-01", "2019-01-20"));
+        return modelProperties;
     }
 }
