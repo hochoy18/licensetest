@@ -52,7 +52,7 @@ public class MLicenseManager extends LicenseManager {
                 throw new LicenseContentException("Currently, there is no module to verify, please purchase");
             }
             //TODO 模块属性验证，目前只验证结束时间
-            if (!modelAndTimes.containsKey(cModelName) && !modelPropertiesValidate(modelAndTimes, cModelName)) {
+            if (!(modelAndTimes.containsKey(cModelName) && modelPropertiesValidate(modelAndTimes, cModelName))) {
                 throw new LicenseContentException("No permission for module " + cModelName +
                         " or Module " + cModelName + " has expired and its end time is "
                         + modelAndTimes.get(cModelName).endTime);
