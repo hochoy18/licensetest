@@ -30,7 +30,7 @@ public class MLicenseManager extends LicenseManager {
         super(param);
     }
 
-    public MLicenseManager(LicenseParam licenseParam, String cModelName) {
+    public  MLicenseManager(LicenseParam licenseParam, String cModelName) {
         super(licenseParam);
         this.cModelName = cModelName;
     }
@@ -110,7 +110,7 @@ public class MLicenseManager extends LicenseManager {
             try {
                 Date client_end_date = format.parse(format.format(new Date()));
                 Date model_end_date = format.parse(modelAndTimes.get(cModelName).endTime);
-                if (model_end_date != null && client_end_date != null && client_end_date.before(model_end_date)) {
+                if (model_end_date != null && client_end_date != null && client_end_date.compareTo(model_end_date) <=0) {
                     flag = true;
                 }
             } catch (ParseException e) {
